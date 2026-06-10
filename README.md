@@ -80,15 +80,6 @@ We estimate the relative pose with **RANSAC** and select the hypothesis with the
 
 ---
 
-## 🖼️ Qualitative Preview
-
-TFIDPose is designed to select the correct target instance from multiple same-category candidates and recover a geometrically consistent relative 6D pose.
-
-<div align="center">
-  <img src="assets/teaser.png" width="90%">
-</div>
-
----
 
 ## 🛠️ Installation
 
