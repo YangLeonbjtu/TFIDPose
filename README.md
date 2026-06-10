@@ -5,11 +5,19 @@
 <h2>Training-Free Instance Disambiguation for Open-Vocabulary Relative 6D Pose Estimation</h2>
 
 <p>
-  <strong>Chunlong Yang</strong>
+  <strong>Chunlong Yang</strong>,
+  <strong>Chunjie Zhang</strong><sup>*</sup>,
+  <strong>Guodong Yang</strong>,
+  <strong>Wei Wang</strong>,
+  <strong>Xiaolong Zheng</strong>
 </p>
 
 <p>
-  Ph.D. Student &nbsp;|&nbsp; 3D Computer Vision &nbsp;|&nbsp; 6D Pose Estimation &nbsp;|&nbsp; Embodied AI
+  Beijing Jiaotong University &nbsp;|&nbsp; Institute of Automation, Chinese Academy of Sciences
+</p>
+
+<p>
+  <sup>*</sup>Corresponding author
 </p>
 
 <p>
@@ -41,7 +49,11 @@
 
 Given an anchor RGB-D image, a query RGB-D image, and a text prompt, TFIDPose estimates the relative 6D pose of the target object across different scenes. The key challenge is **cross-image same-category instance ambiguity**. When multiple visually similar objects appear in the query scene, existing methods may select the wrong instance and produce an incorrect pose.
 
-TFIDPose addresses this problem with a simple **hypothesis-then-verify** pipeline. It first proposes candidate object pairs, ranks them by instance-aware appearance similarity, and then selects the correct pair through geometry-aware verification.
+Our core idea is simple:
+
+> **Instance selection and geometric matching should not be forced into a single coupled representation.**
+
+TFIDPose explicitly decouples these two stages. It first proposes multiple plausible anchor-query instance pairs, then uses geometric consistency to verify which pair is correct.
 
 ---
 
@@ -49,8 +61,9 @@ TFIDPose addresses this problem with a simple **hypothesis-then-verify** pipelin
 
 * **Training-free**: no task-specific fine-tuning is required.
 * **Open-vocabulary**: target objects are specified by text prompts.
-* **Instance-disambiguated**: robust to same-category multi-instance ambiguity.
-* **Geometry-aware**: final selection is based on 3D geometric consistency.
+* **Instance-disambiguated**: handles same-category multi-instance ambiguity.
+* **Geometry-aware**: final selection is decided by 3D geometric consistency.
+* **Hypothesis-then-verify**: appearance proposes candidates, geometry makes the final decision.
 
 ---
 
@@ -60,7 +73,7 @@ TFIDPose addresses this problem with a simple **hypothesis-then-verify** pipelin
   <img src="assets/pipeline.png" width="100%">
 </div>
 
-TFIDPose explicitly decouples **instance selection** from **geometric correspondence**.
+TFIDPose follows a simple **hypothesis-then-verify** pipeline.
 
 ### 1. Candidate Generation
 
@@ -68,18 +81,32 @@ We use **GroundingDINO** to detect text-specified candidate objects and **SAM2**
 
 ### 2. Appearance Hypothesis Ranking
 
-For each candidate instance, we extract mask-pooled **DINOv2** descriptors. Candidate pairs are ranked by cosine similarity, and the top-K hypotheses are retained.
+For each candidate instance, we extract mask-pooled **DINOv2** descriptors. Candidate pairs are ranked by instance-aware appearance similarity, and the top-K pairs are retained as hypotheses.
 
 ### 3. Geometric Matching
 
-For each hypothesis, **RoMa** generates dense correspondences. We then filter correspondences using instance masks and back-project valid matches into 3D.
+For each hypothesis, **RoMa** generates dense correspondences between the anchor and query candidates. Instance masks are used to filter background and distractor matches.
 
 ### 4. Pose Estimation
 
-We estimate the relative pose with **RANSAC** and select the hypothesis with the largest geometric support.
+We back-project valid correspondences into 3D, estimate the relative pose with **RANSAC**, and select the hypothesis with the strongest geometric support.
 
 ---
 
+## 🔑 Core Insight
+
+Appearance similarity is useful for proposing candidates, but it is not reliable enough to make the final decision under same-category ambiguity.
+
+Different instances from the same category may look similar. However, only the correct anchor-query pair should support a coherent rigid transformation between their 3D point sets.
+
+Therefore, TFIDPose uses:
+
+```text
+DINOv2 appearance similarity  →  candidate hypothesis ranking
+RoMa + RANSAC geometry        →  final instance and pose selection
+```
+
+---
 
 ## 🛠️ Installation
 
@@ -125,7 +152,7 @@ If you find this project useful, please consider citing our work.
 ```bibtex
 @article{yang2026tfidpose,
   title   = {TFIDPose: Training-Free Instance Disambiguation for Open-Vocabulary Relative 6D Pose Estimation},
-  author  = {Yang, Chunlong},
+  author  = {Yang, Chunlong and Zhang, Chunjie and Yang, Guodong and Wang, Wei and Zheng, Xiaolong},
   journal = {arXiv preprint},
   year    = {2026}
 }
