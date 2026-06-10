@@ -4,13 +4,28 @@
 
 <h2>Training-Free Instance Disambiguation for Open-Vocabulary Relative 6D Pose Estimation</h2>
 
-**Chunlong Yang**
-Ph.D. Student | 3D Computer Vision | 6D Pose Estimation | Embodied AI
+<p>
+  <strong>Chunlong Yang</strong>
+</p>
 
-[![Project](https://img.shields.io/badge/Project-Page-blue)](#)
-[![Paper](https://img.shields.io/badge/Paper-PDF-red)](#)
-[![Code](https://img.shields.io/badge/Code-Coming%20Soon-lightgrey)](#)
-[![GitHub](https://img.shields.io/badge/GitHub-YangLeonbjtu-black)](https://github.com/YangLeonbjtu)
+<p>
+  Ph.D. Student &nbsp;|&nbsp; 3D Computer Vision &nbsp;|&nbsp; 6D Pose Estimation &nbsp;|&nbsp; Embodied AI
+</p>
+
+<p>
+  <a href="https://github.com/YangLeonbjtu">
+    <img src="https://img.shields.io/badge/GitHub-YangLeonbjtu-black?logo=github" alt="GitHub">
+  </a>
+  <a href="https://scholar.google.com/citations?user=EqFOt3kAAAAJ">
+    <img src="https://img.shields.io/badge/Google%20Scholar-Profile-blue?logo=googlescholar" alt="Google Scholar">
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/Paper-Coming%20Soon-red" alt="Paper">
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/Code-Coming%20Soon-lightgrey" alt="Code">
+  </a>
+</p>
 
 </div>
 
@@ -18,109 +33,83 @@ Ph.D. Student | 3D Computer Vision | 6D Pose Estimation | Embodied AI
 
 ## 🔥 Overview
 
-**TFIDPose** is a training-free framework for open-vocabulary relative 6D pose estimation.
-Given an anchor RGB-D image, a query RGB-D image, and a text prompt, the goal is to estimate the relative 6D pose of the target object across different scenes.
-
-Existing open-vocabulary methods often couple instance selection and geometric matching into a single representation. This design is vulnerable when multiple same-category instances appear in the query scene. TFIDPose addresses this problem by explicitly decoupling instance disambiguation from geometric correspondence.
-
----
-
-## 🧠 Key Idea
-
 <div align="center">
-
-<img src="assets/teaser.png" width="90%">
-
+  <img src="assets/teaser.png" width="95%">
 </div>
 
-TFIDPose follows a simple **hypothesis-then-verify** pipeline:
+**TFIDPose** is a training-free framework for **open-vocabulary relative 6D pose estimation**.
 
-1. **Candidate generation** using GroundingDINO and SAM2
-2. **Instance-aware ranking** using DINOv2 mask-pooled descriptors
-3. **Geometric verification** using RoMa dense correspondence and RANSAC
-4. **Relative pose estimation** from the geometrically consistent hypothesis
+Given an anchor RGB-D image, a query RGB-D image, and a text prompt, TFIDPose estimates the relative 6D pose of the target object across different scenes. The key challenge is **cross-image same-category instance ambiguity**. When multiple visually similar objects appear in the query scene, existing methods may select the wrong instance and produce an incorrect pose.
 
-This design allows the method to resolve cross-image same-category instance ambiguity without task-specific training.
+TFIDPose addresses this problem with a simple **hypothesis-then-verify** pipeline. It first proposes candidate object pairs, ranks them by instance-aware appearance similarity, and then selects the correct pair through geometry-aware verification.
 
 ---
 
 ## ✨ Highlights
 
 * **Training-free**: no task-specific fine-tuning is required.
-* **Open-vocabulary**: objects are specified by text prompts.
-* **Instance-disambiguated**: robust to multiple same-category objects.
-* **Geometry-aware**: final selection is decided by 3D geometric consistency.
-* **Modular design**: built on frozen foundation models and easily upgradable.
+* **Open-vocabulary**: target objects are specified by text prompts.
+* **Instance-disambiguated**: robust to same-category multi-instance ambiguity.
+* **Geometry-aware**: final selection is based on 3D geometric consistency.
 
 ---
 
-## 📌 Method
+## 🧠 Method
 
 <div align="center">
-
-<img src="assets/pipeline.png" width="95%">
-
+  <img src="assets/pipeline.png" width="100%">
 </div>
 
-TFIDPose consists of three main stages:
+TFIDPose explicitly decouples **instance selection** from **geometric correspondence**.
 
-### 1. Candidate Instance Generation
+### 1. Candidate Generation
 
-We first use GroundingDINO to detect text-specified object candidates and SAM2 to obtain instance masks.
+We use **GroundingDINO** to detect text-specified candidate objects and **SAM2** to obtain instance masks.
 
-### 2. Appearance-Based Hypothesis Ranking
+### 2. Appearance Hypothesis Ranking
 
-For each candidate instance, we extract mask-pooled DINOv2 descriptors. Candidate pairs are ranked by instance-aware appearance similarity, and the top-K hypotheses are retained.
+For each candidate instance, we extract mask-pooled **DINOv2** descriptors. Candidate pairs are ranked by cosine similarity, and the top-K hypotheses are retained.
 
-### 3. Geometry-Based Verification
+### 3. Geometric Matching
 
-For each hypothesis, RoMa produces dense correspondences. We filter correspondences using instance masks, back-project them to 3D, and estimate the relative pose with RANSAC. The hypothesis with the strongest geometric support is selected.
+For each hypothesis, **RoMa** generates dense correspondences. We then filter correspondences using instance masks and back-project valid matches into 3D.
 
----
+### 4. Pose Estimation
 
-## 📊 Results
-
-| Dataset    |        Setting |   AR ↑ | ADD(-S) ↑ |
-| ---------- | -------------: | -----: | --------: |
-| REAL275    | Predicted Mask | **--** |    **--** |
-| YCB-V      | Predicted Mask | **--** |    **--** |
-| REAL275-IA | Predicted Mask | **--** |    **--** |
-| YCB-V-IA   | Predicted Mask | **--** |    **--** |
-
-> Results will be updated after paper release.
+We estimate the relative pose with **RANSAC** and select the hypothesis with the largest geometric support.
 
 ---
 
-## 🖼️ Qualitative Results
+## 🖼️ Qualitative Preview
+
+TFIDPose is designed to select the correct target instance from multiple same-category candidates and recover a geometrically consistent relative 6D pose.
 
 <div align="center">
-
-<img src="assets/qualitative.png" width="95%">
-
+  <img src="assets/teaser.png" width="90%">
 </div>
-
-TFIDPose can select the correct target instance from multiple same-category candidates and recover a geometrically consistent relative pose.
 
 ---
 
 ## 🛠️ Installation
+
+The code will be released soon.
 
 ```bash
 git clone https://github.com/YangLeonbjtu/TFIDPose.git
 cd TFIDPose
 ```
 
-More installation details will be released soon.
-
 ---
 
 ## 🚀 Usage
+
+A demo script will be provided after code release.
 
 ```bash
 python demo.py \
   --anchor path/to/anchor_rgbd \
   --query path/to/query_rgbd \
-  --prompt "mug"
+  --prompt "a white small bowl"
 ```
 
 ---
@@ -129,18 +118,18 @@ python demo.py \
 
 ```text
 TFIDPose/
-├── assets/              # figures used in README
-├── configs/             # configuration files
-├── data/                # example data
-├── models/              # model wrappers
-├── scripts/             # running scripts
-├── demo.py              # demo entry
-└── README.md
+├── assets/
+│   ├── teaser.png
+│   └── pipeline.png
+├── README.md
+└── code coming soon
 ```
 
 ---
 
 ## 📚 Citation
+
+If you find this project useful, please consider citing our work.
 
 ```bibtex
 @article{yang2026tfidpose,
@@ -159,5 +148,6 @@ For questions, please contact:
 
 **Chunlong Yang**
 GitHub: [YangLeonbjtu](https://github.com/YangLeonbjtu)
+Google Scholar: [EqFOt3kAAAAJ](https://scholar.google.com/citations?user=EqFOt3kAAAAJ)
 
 ---
